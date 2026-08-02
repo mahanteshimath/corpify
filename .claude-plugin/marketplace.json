@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace-manifest.json",
+  "name": "corpify",
+  "owner": {
+    "name": "Mahantesh Hiremath",
+    "url": "https://bit.ly/atozaboutdata"
+  },
+  "description": "The corpify skill, installable as a Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "corpify",
+      "source": "./",
+      "description": "Rewrite rude, blunt, angry, or emotional messages into professional, human-sounding corporate communication. Preserves the message and any boundary; runs an anti-AI-slop pass adapted from blader/humanizer.",
+      "license": "MIT",
+      "keywords": ["email", "communication", "professional", "tone", "corporate", "de-escalate"]
+    }
+  ]
+}
