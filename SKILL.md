@@ -4,10 +4,10 @@ description: 'Rewrite rude, blunt, angry, emotional, or casual messages into pro
 argument-hint: 'Paste the raw/rude message (optionally name a tone or say "as an email")'
 license: MIT
 metadata:
-  version: '1.1.0'
+  version: '1.2.1'
 ---
 
-# Corpify: Rude/Emotional → Professional, Human Corporate Communication
+# Corpify: Rude/Emotional to Professional, Human Corporate Communication
 
 Turn what a person actually feels into what a professional would send. The input is
 raw, blunt, frustrated, sarcastic, or too casual. The output is polite, clear, and
@@ -17,6 +17,37 @@ This skill is the mirror of [blader/humanizer](https://github.com/blader/humaniz
 humanizer strips AI tells to make text sound human; corpify professionalizes human
 venting, then borrows humanizer's anti-slop rules so the corporate result does not
 read like a template ("I hope this email finds you well...").
+
+## Hard Rules (check before every reply)
+
+These are the rules that fail most often. They apply to the final text you hand back.
+
+1. **No em dash (`—`), en dash (`–`), or spaced hyphen used as a dash.** Not one. End the
+   sentence with a period, or use a comma or a colon. Hyphens inside words (follow-up,
+   check-in) are fine.
+2. **Plain characters only.** No arrows, no emoji, no bold, no curly quotes, no `…`.
+3. **Short in, short out.** The body is at most about 1.5x the input in words (email
+   subject, greeting and sign-off do not count). A one-line vent becomes one or two
+   sentences, not a paragraph.
+4. **Use contractions** (I'll, can't, don't, it's). A calm person writing fast uses them.
+5. **No stock openers or closers** ("I hope this finds you well", "Please don't hesitate
+   to reach out", "Thank you for your understanding"). Start with the point, end when it's
+   said.
+6. **Lint before you reply.** If `scripts/lint-output.py` exists next to this skill and you
+   can run commands, save the final body to a temp file and run
+   `python3 scripts/lint-output.py <file> --source <raw-input-file>`. Fix every `TELL`
+   line and rerun until it prints `OK`. Otherwise run this checklist by hand on the final
+   text, character by character where needed:
+   - any `—`, `–`, ` - ` or `--`? Rewrite as two sentences.
+   - any arrow, emoji, bold, curly quote or `…`? Replace with plain text.
+   - any of: hope this finds you well, reach out, don't hesitate, feel free, thank you for
+     your understanding, I appreciate your patience, going forward, circle back, touch
+     base, leverage, I'd appreciate, please note, kindly? Cut or rephrase.
+   - any fact, date, reason or offer that is not in the source? Remove it.
+   - longer than 1.5x the source? Cut.
+
+The model's habit is to treat these as soft preferences. They are not. A reply that breaks
+rule 1 is wrong even if everything else is perfect.
 
 ## Your Task
 
@@ -32,8 +63,9 @@ When given text to corpify:
    date ("I'll deliver by Friday") and the source did not give one, either ask the user
    or write the version without the invented specific ("I'll share a timeline shortly").
 4. **Match the chosen tone** (see Tone Selection) and the output mode (see Output Modes).
-5. **Run the two passes:** corpify draft → anti-slop audit → final. The final must read
-   like a considerate real person wrote it, with no AI slop and no em dashes.
+5. **Run the two passes:** corpify draft, then anti-slop audit, then final. The final
+   must read like the same person on a calm day, not like a PR team, and must satisfy the
+   Hard Rules.
 
 ## Tone Selection
 
@@ -47,8 +79,8 @@ clearly calls for it.
 | **Firm-but-polite** | Setting a boundary, declining, escalating, repeated ignored asks | Direct, calm, no wiggle room, still courteous |
 
 If the user does not state a tone, infer from severity: a vent about being
-micromanaged → Firm-but-polite; a missed-deadline apology → Diplomatic; a routine
-"send me the file" → Warm-professional. When unsure, use Warm-professional and offer
+micromanaged gets Firm-but-polite; a missed-deadline apology gets Diplomatic; a routine
+"send me the file" gets Warm-professional. When unsure, use Warm-professional and offer
 the Firm alternative in one line.
 
 ## Preserve the Boundary
@@ -118,114 +150,139 @@ Detect these in the input and convert them. Each keeps the meaning; only the ton
 **Watch for:** do your own work, figure it out yourself, that's your problem, none of
 your business, back off.
 **Before:** "Do your own work, it's none of your business."
-**After:** "I'm focused on my own deliverables at the moment, so I won't be able to take
-this on. I'd also prefer to keep the details within the immediate team for now."
+**After:** "I'm focused on my own deliverables right now, so I can't take this on. I'd
+also rather keep the details within the team for now."
 
 ### 2. Blame and accusation
 **Watch for:** you screwed this up, you never replied, this is your fault, you always,
 you didn't.
 **Before:** "You screwed up the numbers and never even replied to my email."
-**After:** "There seem to be some errors in the figures, and I didn't hear back on my
-earlier email. Could we take another look together?"
+**After:** "A few of the numbers look off, and I didn't hear back on my earlier email.
+Can you take another look?"
 
 ### 3. Dismissiveness and contempt
 **Watch for:** obviously, as I already said, did you even read, clearly you don't
 understand, it's simple.
 **Before:** "As I ALREADY said, did you even read my message?"
-**After:** "Just to reconfirm the point from my earlier note, in case it got missed:"
+**After:** "Flagging this again in case it got missed:"
 
 ### 4. Commands and demands
 **Watch for:** send it now, do this immediately, I need this ASAP or else, right now.
 **Before:** "Send me the report NOW."
-**After:** "Could you send the report as soon as you're able? I'm working against a
-tight turnaround on my side."
+**After:** "Could you send the report as soon as you can?"
 
 ### 5. Emotional venting and frustration
 **Watch for:** I'm sick of this, this is ridiculous, I can't deal with this, so
 frustrating.
 **Before:** "I'm sick of this, the process is a joke."
-**After:** "I'm finding the current process difficult to work with and think it may be
-worth revisiting."
+**After:** "The current process isn't working well for me. I think it's worth
+revisiting."
 
 ### 6. Rude boundary-setting
 **Watch for:** not my job, leave me alone, stop bothering me, stop micromanaging.
 **Before:** "Stop bothering me about this."
-**After:** "I'll follow up as soon as I have an update, so there's no need to check in
-in the meantime."
+**After:** "I've got this, so you don't need to keep checking in."
 
 ### 7. Sarcasm and passive aggression
 **Watch for:** thanks for FINALLY, must be nice, wow great job (sarcastic), as per my
 last email (weaponized).
 **Before:** "Thanks for FINALLY getting back to me."
-**After:** "Thanks for getting back to me, I appreciate the follow-up."
+**After:** "Thanks for getting back to me."
 
 ### 8. Profanity, slang, and casual filler
 **Watch for:** swearing, lol, tbh, gonna, wanna, ain't, dude, "this sucks."
 **Before:** "tbh this whole thing is a mess and I'm not gonna deal with it."
-**After:** "To be honest, I have some real concerns about the current state of this, and
-I don't think I'm the right person to resolve it."
+**After:** "I have real concerns about where this stands, and I don't think I'm the
+right person to resolve it."
 
 ### 9. Ultimatums and threats
 **Watch for:** or else, I'm escalating, do it or, last warning, I'll go over your head.
 **Before:** "Fix it today or I'm going to your manager."
-**After:** "If we're unable to resolve this today, I'll need to raise it with the wider
-team to keep things moving. I'd much rather sort it out directly first."
+**After:** "If we can't resolve this today, I'll need to raise it with your manager. I'd
+rather sort it out with you first."
 
 ### 10. Over-apology and self-deprecation
 **Watch for:** so so sorry, I'm such an idiot, this is all my fault, sorry to bother you
 (repeated grovelling).
 **Before:** "I'm so so sorry, I'm such an idiot, this is completely my fault, sorry
 again."
-**After:** "Apologies for the mix-up here, that one's on me. Here's how I'll put it
-right:"
+**After:** "Sorry for the mix-up, that one's on me."
 
 ### 11. Under-communication
 **Watch for:** one-word replies, "k", "no", "fine", "whatever."
 **Before:** "no"
-**After:** "Thanks for checking, but that won't work for me on this occasion."
+**After:** "Thanks for checking, but that won't work for me."
 **Before:** "k"
 **After:** "Understood, thanks, that works for me."
 
 ## Anti-Slop Pass (adapted from humanizer)
 
 After the corpify draft, run this second pass so the professional output does not become
-AI corporate slop. Cut or fix every hit. Categories condensed from humanizer's 33
-patterns, tuned for email and chat.
+AI corporate slop. Cut or fix every hit. `scripts/lint-output.py` checks the mechanical
+items below; the judgment items (rhythm, specificity, over-softening) are on you.
 
-**Openers and closers.** Cut "I hope this email finds you well," "I wanted to reach out,"
-"I'm writing to inform you that." Start with the actual point. Cut sign-off filler like
-"Thank you for your understanding and continued support" unless it earns its place.
+### Mechanical tells (the lint script catches these)
 
-**Sycophancy.** Cut "Great question!", "You're absolutely right!", "I completely
-understand your frustration and I truly value..." Respond directly and once.
+**Dashes.** No `—`, `–`, ` - ` or `--` used as a dash. This is the most common leak, and
+it usually appears as an aside in the middle of a sentence. Fix by splitting into two
+sentences, or use a comma or colon. Do not swap in parentheses everywhere; that is the
+next tell.
 
-**Em and en dashes.** The final has no `—` or `–`. Replace with a period, comma, colon,
-or parentheses. Scan the final text for both characters before returning.
+**Openers and closers.** Cut "I hope this email finds you well," "I wanted to reach
+out," "I'm writing to," "Please don't hesitate to," "Feel free to," "Thank you for your
+understanding." Start with the point. End after the last useful sentence. Do not close
+with a line that restates the message or offers more help unless the source did.
 
-**AI vocabulary and corporate buzzwords.** Trim leverage, synergy, circle back, touch
-base, at the end of the day, moving forward, streamline, robust, seamless, deep dive,
-low-hanging fruit, per my last email (as a weapon), utilize (use "use"). Keep a word only
-if it carries real meaning here.
+**Sycophancy and manufactured warmth.** Cut "Great question," "You're absolutely right,"
+"I completely understand your frustration," "I truly appreciate your patience." Do not
+narrate feelings or intent ("I want to be transparent," "I understand this may be
+difficult"). Just say the thing.
 
-**Rule of three.** Do not force ideas into groups of three ("clear, concise, and
-compelling"). Use the natural number of items.
+**Buzzwords.** Cut leverage, synergy, circle back, touch base, moving forward, at the end
+of the day, streamline, robust, seamless, deep dive, low-hanging fruit, holistic, align
+(as in "let's align"), utilize, per my last email. Use the plain word.
 
-**Empty filler and hedging.** "In order to" → "to"; "due to the fact that" → "because";
-"at this point in time" → "now." Cut "just," "actually," "I think maybe we could
-possibly." Say it once, plainly.
+**Filler and stock transitions.** "In order to" becomes "to." "Due to the fact that"
+becomes "because." Cut "it's worth noting," "that said," "with that said," "let's dive
+in," "without further ado."
 
-**Signposting.** Cut "Let's dive in," "Here's what you need to know," "Without further
-ado." Deliver the content instead.
+**Negative parallelism.** Avoid "not just X, but Y" and "it's not about X, it's about Y."
+State Y.
 
-**Boldface, emoji, and title-case headings.** No decorative bold, no emoji in
-professional output, sentence case for any headings.
+**Fake candor.** No "Honestly," "Candidly," "Real talk" as openers.
 
-**Manufactured warmth.** No fake-candid openers ("Honestly?", "Real talk"), no
-aphorisms ("Communication is the currency of trust"). State the real point.
+### Structural tells (judgment, not caught by the script)
 
-Keep it concise and specific. Vary sentence length. Prefer plain verbs (is, has, can).
-The goal is a message that reads like a thoughtful colleague wrote it in two minutes,
-not a message a template generated.
+**Rule of three.** Do not force ideas into groups of three. Use the natural number.
+
+**Stacked softeners.** One softener per message is enough ("could you," "when you get a
+chance"). "I was wondering if perhaps you might possibly be able to" is the tell.
+
+**Tidy symmetry.** Do not make every sentence the same length, or build balanced pairs
+("I value X, and I also want Y"). Let one sentence be short.
+
+**Vague nouns.** "This matter," "the situation," "the current state of things" are slop.
+Reuse the concrete nouns from the source: the report, Friday's call, the invoice.
+
+**Explaining the rewrite.** In quick-rewrite mode, do not add commentary like "I've
+softened the tone while keeping your boundary." Give the text.
+
+## Sounding Human
+
+The goal is the same person on a calm day, not a PR department. A reader should not be
+able to tell an assistant touched it.
+
+- **Stay close to the sender's own words.** Keep their nouns and their level of
+  formality, minus the heat. If they wrote "sort out," don't upgrade it to "resolve."
+- **Soften one notch, not three.** Rude to neutral-direct, not rude to ceremonial.
+- **Plain verbs and contractions.** Use, need, send, can't, I'll.
+- **One ask per message** unless the source had several.
+- **Short is fine.** Two plain sentences beat a polished paragraph.
+- **Do not over-polish.** A message with no rough edge at all reads as generated. A
+  sentence starting with "And" or "So" is fine in chat.
+
+Test: read the final aloud. If you would not say it to a coworker at the next desk, cut
+it down.
 
 ## What NOT to Over-Correct
 
@@ -247,9 +304,9 @@ not a message a template generated.
    pattern present.
 2. Write a **draft** in the selected tone, preserving the message and boundary.
 3. Audit: ask **"Does this still say what the person meant, including any boundary?"**,
-   **"Did I invent any fact, date, name, or commitment?"**, and **"Does it read like a
-   real considerate human or like AI corporate slop?"** Answer briefly and fix.
-4. Produce the **final**: professional, human, no em dashes, no slop.
+   **"Did I invent any fact, date, name, or commitment?"**, and **"Would a coworker
+   believe a person wrote this?"** Fix what fails.
+4. Produce the **final** and lint it (Hard Rule 6). Re-lint after every fix.
 5. Deliver per the output mode. In quick-rewrite mode, give the final text and, when
    useful, one alternate-tone line. In embedded mode, give only the final text.
 
@@ -260,23 +317,19 @@ not a message a template generated.
 > anyone and it's honestly none of your business how I get it done.
 
 **Diplomatic / soft-spoken:**
-> Thanks for keeping an eye on this. I've got my part well in hand and I'll be sure to
-> reach out the moment I need anything or hit a snag. To keep us both focused, it would
-> help me to run with it independently for now, and I'll share progress at our usual
-> check-ins.
+> I have my part under control. It would help if I could run with this on my own, so I'd
+> ask you to hold off on the check-ins for now.
 
 **Firm-but-polite:**
-> I have my deliverables under control and will flag you if anything changes. I'd
-> appreciate the space to manage the how on my side, rather than frequent check-ins, so
-> I can keep the work moving. Happy to align on the key milestones if that would help.
+> My work is under control, so please stop the frequent check-ins. How I get it done is
+> my call.
 
 **Second input (soft, over-apologetic):**
 > ugh sorry I'm so late again, I'm terrible at this, I'll try to get it done at some
 > point I promise
 
 **Warm-professional:**
-> Apologies for the delay on this, that's on me. I'll get it finished and share it with
-> you as soon as I can. If a firm deadline would help, let me know and I'll commit to one.
+> Sorry for the delay, that's on me. I'll get it done as soon as I can.
 
 (Note: the rewrite did not invent a delivery date, because the source gave none.)
 
@@ -285,8 +338,8 @@ not a message a template generated.
 | Raw (Hinglish) | Corpified (professional English) |
 |---|---|
 | "Ise mere gale pe mat taango." | "This falls outside my scope of work." |
-| "Koi aur credit lene wala hai to main ye kaam nahi karungi." | "I'll be glad to take this on once ownership and credit are clarified." |
-| "Meri baat phir se sun lo, pehle bhi bola tha." | "I'd like to reiterate the suggestion I shared earlier." |
+| "Koi aur credit lene wala hai to main ye kaam nahi karungi." | "I'll take this on once ownership and credit are clear." |
+| "Meri baat phir se sun lo, pehle bhi bola tha." | "Repeating my earlier suggestion in case it got missed." |
 | "Bakwaas baatein karni hai to meeting mein mat aaya karo." | "Let's keep meetings to the agenda and take side topics offline." |
 
 (Idioms map to intent, and the profanity is dropped, not translated.)
@@ -308,6 +361,13 @@ rules so the corporate result stays human.
 
 ## Version History
 
+- 1.2.1 - Examples no longer invent facts or offers. Length rule made consistent (email
+  framing excluded). Hand-run lint checklist inlined for installs without the script.
+- 1.2.0 - Fewer AI tells. Hard Rules block up front (no dashes, length cap,
+  contractions, no stock openers). New `scripts/lint-output.py` to check the final text.
+  Anti-slop pass split into mechanical and structural tells, new Sounding Human section,
+  and all examples shortened and de-polished. Fixed the ultimatum example to keep the
+  "manager" escalation.
 - 1.1.0 - Added mixed-language / code-switched handling (e.g. Hinglish): reads intent
   across languages, maps idioms to meaning rather than literal words, returns
   professional English by default (or another language on request), strips profanity and

@@ -28,6 +28,11 @@ rules so the corporate result stays human.
 - `.claude-plugin/marketplace.json` — optional single-repo marketplace entry so
   `/plugin marketplace add mahanteshimath/corpify` works.
 - `scripts/validate-package.py` — dependency-free sync and version checks.
+- `scripts/lint-output.py` — flags AI tells (dashes, stock phrases, length) in a final
+  message. Referenced by Hard Rule 6 in `SKILL.md`; keep its phrase list aligned with the
+  Anti-Slop Pass.
+- `scripts/test-lint.py` — regression cases for the lint. Run it after changing the
+  phrase list.
 
 ## The maintenance contract
 

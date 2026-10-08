@@ -4,7 +4,7 @@
 > corporate communication, without losing your point.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.1-blue.svg)
 ![Type: Agent Skill](https://img.shields.io/badge/type-agent%20skill-8A2BE2.svg)
 ![Harness: agnostic](https://img.shields.io/badge/harness-agnostic-informational.svg)
 
@@ -135,8 +135,9 @@ Your sample outranks the default tone (but never the no-fabrication rule).
   boundary, just a polite one. A "no" stays a "no."
 - **Never fabricate.** No invented dates, names, numbers, or commitments. If a specific
   is needed and not given, it asks or writes the plain version.
-- **Stay human.** The anti-slop pass cuts em dashes, sycophancy, buzzwords, empty
-  filler, and "I hope this finds you well" openers.
+- **Stay human.** Hard rules up front (no dashes, short output, contractions, no stock
+  openers), plus an anti-slop pass that cuts sycophancy, buzzwords, and filler. Check a
+  draft with `python scripts/lint-output.py draft.txt --source raw.txt`.
 
 ## Patterns handled
 
@@ -153,10 +154,8 @@ returns professional English (or another language on request).
 **Before:** "I'll do my work, you do yours. Stop chasing me every five minutes, it's
 none of your business how I get it done."
 
-**After (Firm-but-polite):** "I have my deliverables under control and will flag you if
-anything changes. I'd appreciate the space to manage the how on my side, rather than
-frequent check-ins, so I can keep the work moving. Happy to align on the key milestones
-if that would help."
+**After (Firm-but-polite):** "My work is under control, so please stop the frequent
+check-ins. How I get it done is my call."
 
 ## Reference
 
@@ -178,6 +177,11 @@ Created and maintained by **[Mahantesh Hiremath](https://bit.ly/atozaboutdata)**
 
 ## Version history
 
+- 1.2.1 - Examples no longer invent facts or offers. Length rule made consistent (email
+  framing excluded). Hand-run lint checklist inlined for installs without the script.
+  Lint now catches more stock phrases and no longer flags list bullets.
+- 1.2.0 - Fewer AI tells: Hard Rules up front, `scripts/lint-output.py`, split
+  mechanical/structural anti-slop pass, Sounding Human guidance, shorter examples.
 - 1.1.0 - Added mixed-language / code-switched handling (e.g. Hinglish): reads intent
   across languages, maps idioms to meaning, returns professional English by default (or
   another language on request), strips profanity and slurs, and refuses to launder pure

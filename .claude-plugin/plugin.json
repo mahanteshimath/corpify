@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "corpify",
   "description": "Rewrite rude, blunt, angry, or emotional messages into professional, human-sounding corporate communication. Preserves the message and any boundary; runs an anti-AI-slop pass adapted from blader/humanizer.",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "author": {
     "name": "Mahantesh Hiremath",
     "url": "https://bit.ly/atozaboutdata"
